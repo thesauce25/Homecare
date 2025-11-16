@@ -30,7 +30,11 @@ SEARCH_SOURCES = [
     "bizbuysell.com",
     "businessbroker.net",
     "bizquest.com",
-    "sunbeltnetwork.com"
+    "sunbeltnetwork.com",
+    "loopnet.com",
+    "dealstream.com",
+    "bizben.com",
+    "americanhealthcarecapital.com"
 ]
 
 def validate_config():

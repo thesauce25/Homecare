@@ -150,38 +150,60 @@ If this is not a senior/home care business listing in Los Angeles/Southern Calif
         Returns a list of business dictionaries with extracted information.
         """
         all_businesses = []
-
-        print("\n=== Phase 1: Finding Business Listings ===")
         all_listing_urls = set()
 
-        # First, extract listing URLs from search pages
-        for result in search_results:
-            print(f"\nScanning: {result['url']}")
-            listing_urls = self.extract_business_listings(
-                result['content'],
-                result['url']
-            )
-            print(f"  Found {len(listing_urls)} potential listings")
-            all_listing_urls.update(listing_urls)
+        # Check if we have direct listings or search pages
+        direct_listings = [r for r in search_results if r.get('is_direct_listing', False)]
+        search_pages = [r for r in search_results if not r.get('is_direct_listing', False)]
 
-        print(f"\n=== Phase 2: Analyzing {len(all_listing_urls)} Business Listings ===")
+        # Handle direct listings (from manual_urls.txt)
+        if direct_listings:
+            print("\n=== Analyzing Direct Business Listings ===")
 
-        # Now analyze each individual listing
-        for idx, url in enumerate(list(all_listing_urls)[:config.MAX_SEARCH_RESULTS], 1):
-            print(f"\n[{idx}/{min(len(all_listing_urls), config.MAX_SEARCH_RESULTS)}] Analyzing: {url}")
+            for idx, result in enumerate(direct_listings, 1):
+                url = result['url']
+                print(f"\n[{idx}/{len(direct_listings)}] Analyzing: {url}")
 
-            # Fetch the listing page
-            from search_engine import BusinessSearcher
-            searcher = BusinessSearcher()
-            html = searcher.fetch_page(url)
-
-            if html:
-                business_data = self.analyze_business_listing(html, url)
+                business_data = self.analyze_business_listing(result['content'], url)
 
                 if business_data:
                     print(f"  ✓ Extracted: {business_data.get('business_name', 'Unknown')}")
                     all_businesses.append(business_data)
                 else:
                     print(f"  ✗ Skipped (not relevant or parsing failed)")
+
+        # Handle search pages (automated search)
+        if search_pages:
+            print("\n=== Phase 1: Finding Business Listings ===")
+
+            # First, extract listing URLs from search pages
+            for result in search_pages:
+                print(f"\nScanning: {result['url']}")
+                listing_urls = self.extract_business_listings(
+                    result['content'],
+                    result['url']
+                )
+                print(f"  Found {len(listing_urls)} potential listings")
+                all_listing_urls.update(listing_urls)
+
+            print(f"\n=== Phase 2: Analyzing {len(all_listing_urls)} Business Listings ===")
+
+            # Now analyze each individual listing
+            for idx, url in enumerate(list(all_listing_urls)[:config.MAX_SEARCH_RESULTS], 1):
+                print(f"\n[{idx}/{min(len(all_listing_urls), config.MAX_SEARCH_RESULTS)}] Analyzing: {url}")
+
+                # Fetch the listing page
+                from search_engine import BusinessSearcher
+                searcher = BusinessSearcher()
+                html = searcher.fetch_page(url)
+
+                if html:
+                    business_data = self.analyze_business_listing(html, url)
+
+                    if business_data:
+                        print(f"  ✓ Extracted: {business_data.get('business_name', 'Unknown')}")
+                        all_businesses.append(business_data)
+                    else:
+                        print(f"  ✗ Skipped (not relevant or parsing failed)")
 
         return all_businesses

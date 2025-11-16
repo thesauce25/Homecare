@@ -1,0 +1,21 @@
+# Manual Business Listing URLs
+#
+# If the automated search is having trouble, you can manually add
+# business listing URLs here (one per line) and the application will
+# analyze them.
+#
+# How to use:
+# 1. Find senior care business listings on sites like:
+#    - BizBuySell.com
+#    - LoopNet.com
+#    - BizQuest.com
+#    - DealStream.com
+# 2. Copy the full URL of each listing
+# 3. Paste one URL per line below (uncomment by removing the #)
+# 4. Run the application
+#
+# Example:
+# https://www.bizbuysell.com/Business-Opportunity/Some-Business-123456/
+# https://www.loopnet.com/listing/some-listing-789/
+
+# Add your URLs below:
