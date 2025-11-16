@@ -12,7 +12,17 @@ class BusinessSearcher:
 
     def __init__(self):
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
         }
         self.search_urls = []
 
@@ -64,15 +74,30 @@ class BusinessSearcher:
 
         return urls
 
-    def fetch_page(self, url: str) -> str:
-        """Fetch HTML content from a URL."""
-        try:
-            response = requests.get(url, headers=self.headers, timeout=10)
-            response.raise_for_status()
-            return response.text
-        except requests.RequestException as e:
-            print(f"Error fetching {url}: {e}")
-            return ""
+    def fetch_page(self, url: str, max_retries: int = 3) -> str:
+        """Fetch HTML content from a URL with retry logic."""
+        for attempt in range(max_retries):
+            try:
+                # Increase timeout to 30 seconds
+                response = requests.get(url, headers=self.headers, timeout=30)
+                response.raise_for_status()
+                return response.text
+            except requests.Timeout as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # Exponential backoff: 1, 2, 4 seconds
+                    print(f"  Timeout on attempt {attempt + 1}/{max_retries}, retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    print(f"Error fetching {url}: {e}")
+                    return ""
+            except requests.RequestException as e:
+                # For 403 and other errors, don't retry as they won't succeed
+                if hasattr(e, 'response') and e.response is not None and e.response.status_code == 403:
+                    print(f"Error fetching {url}: {e} (site may be blocking automated requests)")
+                else:
+                    print(f"Error fetching {url}: {e}")
+                return ""
+        return ""
 
     def extract_links_from_html(self, html: str, base_domain: str = None) -> List[str]:
         """Extract relevant business listing links from HTML."""
