@@ -145,7 +145,7 @@ class BusinessSearcher:
             print(f"Retrieved {len(results)} manual listings")
             return results
 
-        # Otherwise, use automated search
+        # Use automated search with improved bot detection avoidance
         search_urls = self.build_search_urls()
         results = []
 

@@ -49,7 +49,12 @@ def main():
         search_results = searcher.search_for_businesses()
 
         if not search_results:
-            print("❌ No search results found. Please check your internet connection.")
+            print("❌ No search results found.")
+            print("\n💡 TIP: To avoid bot detection, use Claude's web search:")
+            print("   1. Run: python claude_search_assistant.py")
+            print("   2. Use Claude Code to find business URLs")
+            print("   3. Add URLs to manual_urls.txt")
+            print("   4. Run this script again")
             return 1
 
         # Step 2: Analyze with Claude
